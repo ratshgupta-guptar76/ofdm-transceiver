@@ -25,7 +25,7 @@ For the `OFDM` the following values are a standard:
 - `pilot_indices`$\quad\rightarrow\quad$ [11 $\,$ 25 $\,$ 39 $\,$ 53]
 - `guards`$\quad\rightarrow\quad$ [ $0-5$, $\,$ $59-63$ ]
 - `bits_per_ofdm_symbol`$\quad\rightarrow\quad$ 96
-- `bits_per_frame` $\quad\rightarrow\quad$ 1920
+- `bits_per_frame` $\quad\rightarrow\quad$ 1680
 
 This implementation uses `QPSK` as well as `16-QAM`. While it doesn't use both simultaneously in the same sub-carrier, since that isn't possible - the transmitter estimates whether to use `QPSK/16-QAM` based on the signal strength and power. The receiver is told which modulation was used so that it can use the appropriate demapper.
 
@@ -62,4 +62,22 @@ To normalize to unit average energy:
 [$s_{\text{norm}} = \frac{s}{\sqrt{E_s}} = \frac{s}{\sqrt{10}}$]
 
 So 16-QAM uses division by ($\sqrt{10}$).
+
+### Other Mathematical Concepts used
+___`circular-convolution`___: Unlike in linear convolution, the output $Y[k]$ is only dependant on the pointwise multiplication of $X[k]$ and $H[k]$. For, $y = x ⊛ h$
+$$
+Y[k] = X[k] * H[k]
+$$
+
+___`Zadoff-Chu`___: Used for Preamble generation. The preamble lets the receiver know where new frames start. The mathematical formula,
+$$
+z[n] = e^{-j\pi r\cdot \frac{n(n+1)}{N}}
+$$
+Here,$\:$ $n\rightarrow$ `bin idx`,$\,$ $r\rightarrow$ `root idx`,$\,$ $N\rightarrow$ `sequence len`
+
+The `Zadoff-Chu` algorithm was used for the following reasons:
+
+    - Constant Amplitude
+    - Ideal Autocorrelation
+    - Noise resillience through processing gain
 
