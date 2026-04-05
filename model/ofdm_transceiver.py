@@ -506,6 +506,11 @@ def main():
     rx_signal = AWGN(tx_signal, snr_db=15.0)
     rx_bits, rx_symbols = ofdm_receive(rx_signal, cfg)
 
+    assert np.array_equal(
+            tx_bits,
+            qam16_demap(qam16_map(tx_bits))
+            ),AssertionError("Modulation/Demodulation not correct")
+
     ber = compute_ber(tx_bits, rx_bits)
     print(f"  Transmitted: {cfg.bits_per_frame} bits")
     print(f"  Recovered:   {len(rx_bits)} bits")
@@ -529,7 +534,10 @@ def main():
     )
 
     fig3 = plot_ber_curve(snr_range, ber_measured, mod_order=cfg.mod_order)
-    fig3.savefig("ber_curve_qpsk.png", dpi=150)
+    if cfg.mod_order == 4:
+        fig3.savefig("ber_curve_qpsk.png", dpi=150)
+    else:
+        fig3.savefig("ber_curve_qam16.png", dpi=150)
     print("\n  → Saved ber_curve_qpsk.png")
 
     # Show constellations at multiple SNR levels
@@ -553,8 +561,7 @@ def main():
     fig4.savefig("constellations_multi_snr.png", dpi=150)
     print("  → Saved constellations_multi_snr.png")
 
-    plt.show()
-    print("\n  ✓ Phase 1 complete. All plots generated.\n")
+    print("\n  Phase 1 complete. All plots generated.\n")
 
 
 
