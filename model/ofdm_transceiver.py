@@ -95,8 +95,8 @@ def qpsk_map(bits: np.ndarray) -> np.ndarray:
     greyCode_map = {
         (0, 0): (1 + 1j),
         (0, 1): (1 - 1j),
-        (1, 0): (-1 + 1j),
-        (1, 1): (-1 - 1j),
+        (1, 1): (-1 + 1j),
+        (1, 0): (-1 - 1j),
     }
 
     symbols = np.array([greyCode_map[tuple(p)] for p in pairs]) / np.sqrt(2)
@@ -119,8 +119,8 @@ def qam16_map(bits: np.ndarray) -> np.ndarray:
     greyCode_map = {
         (0, 0): -3,
         (0, 1): -1,
-        (1, 0):  1,
-        (1, 1):  3,
+        (1, 1):  1,
+        (1, 0):  3,
     }
 
     symbols = np.array([
@@ -229,9 +229,9 @@ def qam16_demap(symbols: np.ndarray) -> np.ndarray:
         for val, bit, idx in [(real, bits, 4*i), (imag, bits, 4*i+2)]:
             if val < -2:
                 bit[idx], bit[idx+1] = 0, 0
-            elif val < -1:
+            elif val < 0:
                 bit[idx], bit[idx+1] = 0, 1
-            elif val < 1:
+            elif val < 2:
                 bit[idx], bit[idx+1] = 1, 1
             else:
                 bit[idx], bit[idx+1] = 1, 0
@@ -248,12 +248,13 @@ def detect_preamble(signal: np.ndarray, cfg: OFDMConfig) -> int:
 
     corr = np.abs(np.correlate(signal, zadoff_chu_preamble, mode="valid"))
     # I didn't do this, I don't understand this
-    # corr /= (np.sqrt(np.sum(zadoff_chu_preamble**2) * np.convolve(np.abs(signal**2),
-    #                                                               np.ones(len(zadoff_chu_preamble)),
-    #                                                               mode="valid"
-    #                                                               )
-    #                  )
-    #          )
+    preamble_energy = np.sum(np.abs(zadoff_chu_preamble) ** 2)
+    signal_window_energy = np.convolve(
+        np.abs(signal) ** 2,
+        np.ones(len(zadoff_chu_preamble)),
+        mode="valid"
+    )
+    corr /= np.sqrt(preamble_energy * signal_window_energy + 1e-12)
     
     peak_idx = np.argmax(corr)
     frame_start = peak_idx + len(zadoff_chu_preamble)
@@ -493,7 +494,7 @@ def run_ber_simulation(snr_range_db=None, n_trials=10, mod_order=4):
 
 def main():
     """Run the full Phase 1 demo."""
-    cfg = OFDMConfig(mod_order=4)
+    cfg = OFDMConfig(mod_order=16)
 
     # ── Single-frame demo at specific SNR ──
     print("\n" + "─" * 55)
@@ -522,12 +523,12 @@ def main():
 
     # ── BER curve simulation ──
     snr_range, ber_measured = run_ber_simulation(
-        snr_range_db=np.arange(0, 22, 2),
-        n_trials=20,
-        mod_order=4
+        snr_range_db=np.arange(0, 22, 0.5),
+        n_trials=50,
+        mod_order=cfg.mod_order
     )
 
-    fig3 = plot_ber_curve(snr_range, ber_measured, mod_order=4)
+    fig3 = plot_ber_curve(snr_range, ber_measured, mod_order=cfg.mod_order)
     fig3.savefig("ber_curve_qpsk.png", dpi=150)
     print("\n  → Saved ber_curve_qpsk.png")
 
