@@ -81,3 +81,16 @@ The `Zadoff-Chu` algorithm was used for the following reasons:
     - Ideal Autocorrelation
     - Noise resillience through processing gain
 
+___`Piltos`___: Pilots are known symbols that are used to assess how much the wireless channel has changed the signal. In short pilots serve the purpose of comparing the Tx and the Rx to judge the noise caused by the wirelessly transmitted signal.
+
+    How pilots are used:
+    - Transmit pilots with known symbols at known subcarrier locations (Set like a standard)
+    - The receiver sees the corrupted versions of these pilots.
+    - By comparing what was sent vs what was received, you can compute the channel response at these pilot locations 
+    - Then you can interpolate those estimates across the data subcarriers and equalize the channel effect
+
+___`Interpolation`___: After the change in the pilots is observed, the channel is interpolated using the esitmate. Interpolation can be seen through the following example:
+
+For a subcarrier at bin 18 (between pilot indices 11 and 25), the interpolation computes `H[18]` by using the weighted average $\rightarrow$ $H[18] = H[11] \cdot \frac{25 - 18}{18 - 11} + H[25] \cdot \frac{18 - 11}{25 - 18}$
+
+Interpolation uses the fact that noise is 
