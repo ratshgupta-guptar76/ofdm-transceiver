@@ -536,9 +536,10 @@ def main():
     fig3 = plot_ber_curve(snr_range, ber_measured, mod_order=cfg.mod_order)
     if cfg.mod_order == 4:
         fig3.savefig("ber_curve_qpsk.png", dpi=150)
+        print("\n  → Saved ber_curve_qpsk.png")
     else:
         fig3.savefig("ber_curve_qam16.png", dpi=150)
-    print("\n  → Saved ber_curve_qpsk.png")
+        print("\n  → Saved ber_curve_qam16.png")
 
     # Show constellations at multiple SNR levels
     fig4, axes = plt.subplots(1, 4, figsize=(16, 4))
